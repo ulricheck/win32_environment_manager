@@ -1,8 +1,134 @@
-from enaml.widgets.api import Window, Container, Label
+from enaml.core.api import Conditional, Looper
+from enaml.layout.api import vbox, hbox, align, spacer
+from enaml.stdlib.message_box import question
+from enaml.widgets.api import (
+    Window, Container, Label, Field, PushButton, ScrollArea, Slider, Html, MultilineField, PopupView, Form
+)
+
+enamldef ConfigurationOverview(PopupView):
+    attr config
+
+    foreground = 'white'
+    background = 'rgba(30, 30, 30, 0.85)'
+    parent_anchor = (0.5, 0.5)
+    anchor = (0.5, 0.0)
+    arrow_size = 20
+    arrow_edge = 'top'
+    offset = (0, 0)
+
+    Form:
+        padding = 20
+        Conditional:
+            condition = len(config.add_keys) > 0
+            Label:
+                text = "Add Variables"
+            MultilineField:
+                minimum_size = (500, 100)
+                maximum_size = (500,100)
+                text = u"\n".join([u"%s: %s" % (v.key, v.get_value_as_string()) for v in config.add_keys])
+
+        Conditional:
+            condition = len(config.remove_keys) > 0
+            Label:
+                text = "Remove Variables"
+            MultilineField:
+                minimum_size = (500, 100)
+                maximum_size = (500,100)
+                text = u"\n".join([u"%s: %s" % (v.key, v.get_value_as_string()) for v in config.remove_keys])
+
+        Conditional:
+            condition = len(config.prepend_path) > 0
+            Label:
+                text = "Prepend to PATH"
+            MultilineField:
+                minimum_size = (500, 100)
+                maximum_size = (500,100)
+                text = u"\n".join([v.value for v in config.prepend_path])
+
+        Conditional:
+            condition = len(config.append_path) > 0
+            Label:
+                text = "Append to PATH"
+            MultilineField:
+                minimum_size = (500, 100)
+                maximum_size = (500,100)
+                text = u"\n".join([v.value for v in config.append_path])
 
 
-enamldef Main(Window):
-    attr message = "Hello, world!"
+enamldef ChangeInProgress(PopupView):
+    foreground = 'white'
+    background = 'rgba(30, 30, 30, 0.85)'
+    window_type = 'tool_tip'
+    parent_anchor = (1.0, 1.0)
+    anchor = (1.0, 1.0)
+    offset = (-10, -10)
+    timeout = 5
+    fade_in_duration = 500
+    fade_out_duration = 500
     Container:
         Label:
-            text = message
+            foreground = 'white'
+            text = 'Applying Changes to Environment'
+            align = 'center'
+
+
+def activate_configuration(window, name):
+    popup = ChangeInProgress(window, window_type='window')
+    popup.show()
+    window.appstate.activate_configuration(name)
+    popup.hide()
+
+
+def confirm_close(window, event):
+    button = question(
+        window, 'Environment Manager', 'Are you sure you want to quit?'
+    )
+    if button and button.action == 'accept':
+        # notify shutdown
+        window.appstate.app_stopping()
+        event.accept()
+    else:
+        event.ignore()
+
+
+enamldef Main(Window): win:
+    attr appstate
+
+    title = "Environment Manager"
+    closing :: confirm_close(self, change['value'])
+    minimum_size = (400,200)
+    Container:
+        constraints = [
+            vbox(
+                label,
+                scroller,
+            ),
+            align('v_center', label),
+        ]
+        Label: label:
+            text = 'Select Environment Configuration'
+        ScrollArea: scroller:
+            Container:
+                Looper: looper:
+                    iterable << [v.name for v in sorted(appstate.config.configurations.values(), lambda a,b: cmp(a.order, b.order))]
+                    Container:
+                        padding = 0
+                        constraints = [
+                            vbox(
+                                hbox(item_activate, item_show, item_label, spacer),
+                                item_description,
+                            )
+                        ]
+                        Label: item_label:
+                            text = loop_item
+                        PushButton: item_activate:
+                            text = 'Activate'
+                            enabled << appstate.config.configurations[loop_item].is_active==False
+                            clicked :: activate_configuration(win, loop_item)
+                        PushButton: item_show:
+                            text = 'Show'
+                            clicked :: ConfigurationOverview(self, config=appstate.config.configurations[loop_item].get_config()).show()
+                        Html: item_description:
+                            constraints = [height == 100]
+                            source << '<b>%s</b><ul>%s</ul>' % (appstate.config.configurations[loop_item].description, "".join(["<li>%s</li>" % s.name for s in appstate.config.configurations[loop_item].sections]))
+

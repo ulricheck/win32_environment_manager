@@ -7,13 +7,13 @@ import enaml
 from enaml.qt.qt_application import QtApplication
 
 log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 logging.captureWarnings(True)
 
 import logging.config
 from environment_manager.app import AppState
 from environment_manager.guilogging import Syslog
-
+from environment_manager.model import parse_config
 
 def main():
 
@@ -59,22 +59,25 @@ def main():
             log.warn("Skipping non-existant config file: %s" % cfgfname)
 
     config = ConfigParser.ConfigParser()
+    config.optionxform = str
     try:
         log.info("Loading config files: %s" % (",".join(cfgfiles)))
         config.read(cfgfiles)
-        appstate.context['config'] = config
+        appstate.config = parse_config(config)
     except Exception, e:
         log.error("Error parsing config file(s): %s" % (cfgfiles,))
         log.exception(e)
-
 
     with enaml.imports():
         from environment_manager.views.main_view import Main
 
     app = QtApplication()
 
-    view = Main(message="Hello World, from Python!")
+    view = Main(appstate=appstate)
     view.show()
+
+    # notify application start
+    appstate.app_starting()
 
     # Start the application event loop
     app.start()
