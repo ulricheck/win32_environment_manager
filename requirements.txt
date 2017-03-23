@@ -4,3 +4,4 @@ enaml>=0.9.8
 mock>=2.0.0
 QtPy>=1.2.1
 pyyaml>=3.12
+pyinstaller>=3.2.1

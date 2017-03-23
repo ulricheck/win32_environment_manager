@@ -1,4 +1,5 @@
 import logging
+import os
 import yaml
 
 from atom.api import Atom, Value, Typed, Dict, Event, Instance, Bool, Unicode, observe
@@ -61,6 +62,17 @@ class AppState(Atom):
 
     @observe("app_starting")
     def _handle_setup(self, change):
+        if self.config.recovery_file:
+            if os.path.isfile(self.config.recovery_file):
+                log.warn("Leftover Recovery File found - try to undo previous changes ...")
+                try:
+                    data = yaml.load(open(self.config.recovery_file, 'r').read())
+                    changelist = ChangeList.from_dict(data)
+                    changelist.execute_undo_change()
+                except Exception, e:
+                    log.error(e)
+                os.unlink(self.config.recovery_file)
+
         log.info("Setup Environment Manager")
         for key, cfg in self.config.configurations.items():
             if cfg.is_default:
@@ -89,8 +101,11 @@ class AppState(Atom):
             active_config = self.config.configurations[name]
 
             changelist = active_config.get_config().get_change_list()
-            print "ChangeList"
-            print changelist.to_dict()
+            if self.config.recovery_file:
+                log.debug("Store Recovery File: %s" % self.config.recovery_file)
+                with open(self.config.recovery_file, 'w') as fd:
+                    fd.write(yaml.dump(changelist.to_dict()))
+
             changelist.execute_do_change()
 
             deferred_call(setattr, self, "active_changelist", changelist)
@@ -113,6 +128,11 @@ class AppState(Atom):
             if self.active_changelist is not None:
                 changelist = self.active_changelist
                 changelist.execute_undo_change()
+
+            if self.config.recovery_file:
+                if os.path.isfile(self.config.recovery_file):
+                    log.debug("Remove Recovery File: %s" % self.config.recovery_file)
+                    os.unlink(self.config.recovery_file)
 
             deferred_call(setattr, self, "active_changelist", None)
 

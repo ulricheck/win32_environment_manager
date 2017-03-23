@@ -75,6 +75,7 @@ class Configuration(Atom):
 class ConfigurationManager(Atom):
     sections = Dict()
     configurations = Dict()
+    recovery_file = Unicode()
 
 
 class Command(Atom):
@@ -87,7 +88,7 @@ class Command(Atom):
 
     @classmethod
     def from_dict(klass, values):
-        result = klass(**values)
+        return klass(**values)
 
     def __repr__(self):
         if self.type == 'AddKey':
@@ -252,6 +253,9 @@ def parse_config_values(ini_cfg, section_name):
 def parse_config(ini_cfg):
     sections_cfg = [v.strip() for v in ini_cfg.get('environment_manager', 'sections').split(',')]
     configurations_cfg = [v.strip() for v in ini_cfg.get('environment_manager', 'configurations').split(',')]
+    recovery_file = ""
+    if ini_cfg.has_option('environment_manager', 'recovery_file'):
+        recovery_file = ini_cfg.get('environment_manager', 'recovery_file')
     sections = {}
     for section_name in sections_cfg:
         log.debug("Add section: %s" % section_name)
@@ -289,5 +293,7 @@ def parse_config(ini_cfg):
             else:
                 log.error("Configuration: %s is invalid" % configuration_name)
 
-    return ConfigurationManager(sections=sections, configurations=configurations)
+    return ConfigurationManager(sections=sections,
+                                configurations=configurations,
+                                recovery_file=recovery_file)
 
