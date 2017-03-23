@@ -124,12 +124,13 @@ enamldef Main(MainWindow): win:
             Label:
                 text << appstate.job_status or "Idle"
 
-    # MenuBar:
-    #     Menu:
-    #         title = '&File'
-    #         Action:
-    #             text = 'Quit\tCtrl+Q'
-    #             triggered :: win.close()
+    MenuBar:
+        Menu:
+            title = '&File'
+            Action:
+                enabled << appstate.bgThread_running == False
+                text = 'Quit\tCtrl+Q'
+                triggered :: win.close()
 
     Container:
         constraints = [
