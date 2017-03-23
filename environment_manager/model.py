@@ -84,7 +84,11 @@ class Command(Atom):
     value = Unicode()
 
     def to_dict(self):
-        pass
+        return {k: getattr(self, k) for k in self.__atom_members__}
+
+    @classmethod
+    def from_dict(klass, values):
+        result = klass(**values)
 
     def __repr__(self):
         if self.type == 'AddKey':
@@ -105,6 +109,16 @@ class ChangeList(Atom):
     do_change = List(Command)
     undo_change = List(Command)
     job_active = Bool(False)
+
+    def to_dict(self):
+        return {"do_change": [v.to_dict() for v in self.do_change],
+                "undo_change": [v.to_dict() for v in self.undo_change],
+                "job_active": self.job_active,
+                }
+
+    @classmethod
+    def from_dict(klass, value):
+        pass
 
     def __repr__(self):
         return "Do:\n%s\n\nUndo:\n%s" % ("\n".join([str(v) for v in self.do_change]),"\n".join([str(v) for v in self.undo_change]))

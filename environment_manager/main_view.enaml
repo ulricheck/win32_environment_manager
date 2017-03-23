@@ -1,13 +1,15 @@
 import os
 from enaml.core.api import Conditional, Looper
 from enaml.layout.api import vbox, hbox, align, spacer
-from enaml.stdlib.message_box import question
 from enaml.widgets.api import MainWindow, MenuBar, Menu, Action, ActionGroup
 from enaml.icon import Icon, IconImage
 from enaml.image import Image
 from enaml.widgets.api import (
     Container, Label, Field, PushButton, ScrollArea, StatusBar, StatusItem, Html, MultilineField, PopupView, Form
 )
+
+from message_box import question
+
 
 def load_icon(name):
 	dirname = os.path.dirname(__file__)
@@ -19,6 +21,7 @@ def load_icon(name):
 	return Icon(images=[icg])
 
 WINDOW_ICON = load_icon('emblem-system')
+
 
 
 enamldef ConfigurationOverview(PopupView):
