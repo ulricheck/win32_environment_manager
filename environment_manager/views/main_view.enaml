@@ -56,29 +56,8 @@ enamldef ConfigurationOverview(PopupView):
                 text = u"\n".join([v.value for v in config.append_path])
 
 
-enamldef ChangeInProgress(PopupView):
-    foreground = 'white'
-    background = 'rgba(30, 30, 30, 0.85)'
-    window_type = 'tool_tip'
-    parent_anchor = (1.0, 1.0)
-    anchor = (1.0, 1.0)
-    offset = (-10, -10)
-    timeout = 5
-    fade_in_duration = 500
-    fade_out_duration = 500
-    Container:
-        Label:
-            foreground = 'white'
-            text = 'Applying Changes to Environment'
-            align = 'center'
-
-
 def activate_configuration(window, name):
-    popup = ChangeInProgress(window, window_type='window')
-    popup.show()
     window.appstate.activate_configuration(name)
-    popup.hide()
-
 
 
 def confirm_close(window, event):
