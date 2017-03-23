@@ -1,6 +1,9 @@
 import os, sys
 from atom.api import Atom, Value, List, Dict, Str, Bool, Int, Float, Enum, Typed, Coerced, Unicode
-from environment_manager import win32env
+if sys.platform.startswith('win'):
+    from environment_manager import win32env as env
+else:
+    from environment_manager import mockenv as env
 
 import logging
 log = logging.getLogger(__name__)
@@ -97,6 +100,7 @@ class Command(Atom):
 class ChangeList(Atom):
     do_change = List(Command)
     undo_change = List(Command)
+    job_active = Bool(False)
 
     def __repr__(self):
         return "Do:\n%s\n\nUndo:\n%s" % ("\n".join([str(v) for v in self.do_change]),"\n".join([str(v) for v in self.undo_change]))
@@ -109,14 +113,14 @@ class ChangeList(Atom):
         for cmd in all_commands.get('RemoveKey', []):
             log.debug(cmd)
             try:
-                win32env.delete_key(cmd.name)
+                env.delete_key(cmd.name)
             except Exception, e:
                 log.error(e)
 
         for cmd in all_commands.get('AddKey', []):
             log.debug(cmd)
             try:
-                win32env.set_key(cmd.name, cmd.value)
+                env.set_key(cmd.name, cmd.value)
             except Exception, e:
                 log.error(e)
 
@@ -142,7 +146,7 @@ class ChangeList(Atom):
             removes = remove_value.get(name, [])
             log.debug("Update %s => Prepends: %s, Appends: %s, Removes: %s" % (name, prepends, appends, removes))
             try:
-                win32env.update_value(name, prepend_values=prepends, append_values=appends, remove_values=removes)
+                env.update_value(name, prepend_values=prepends, append_values=appends, remove_values=removes)
             except Exception, e:
                 log.error(e)
 
@@ -164,7 +168,7 @@ class CompositeConfig(Atom):
 
     def get_change_list(self, environment=None):
         if environment is None:
-            environment = win32env.enum_keys()
+            environment = env.enum_keys()
 
         do_change = []
         undo_change = []

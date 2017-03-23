@@ -39,6 +39,12 @@ def main():
         logging.config.fileConfig(options.py_logconfig, disable_existing_loggers=False)
         log.info("Done reloading config.")
 
+    # # activate gui logging
+    # logger = logging.getLogger()
+    # # add verbose flag ..
+    # logger.setLevel(logging.DEBUG)
+    # logger.addHandler(syslog.handler)
+
     appstate.args = args
     appstate.options = options
 
