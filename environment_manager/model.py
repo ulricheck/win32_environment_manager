@@ -1,5 +1,4 @@
 import os, sys
-import yaml
 from atom.api import Atom, Value, List, Dict, Str, Bool, Int, Float, Enum, Typed, Coerced, Unicode
 if sys.platform.startswith('win'):
     from environment_manager import win32env as env
@@ -118,7 +117,10 @@ class ChangeList(Atom):
 
     @classmethod
     def from_dict(klass, value):
-        pass
+        return klass(do_change=[Command.from_dict(v) for v in value.get('do_change', [])],
+                     undo_change=[Command.from_dict(v) for v in value.get('undo_change', [])],
+                     job_active=value.get('job_active', False),
+                     )
 
     def __repr__(self):
         return "Do:\n%s\n\nUndo:\n%s" % ("\n".join([str(v) for v in self.do_change]),"\n".join([str(v) for v in self.undo_change]))

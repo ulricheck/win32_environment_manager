@@ -1,4 +1,5 @@
 import logging
+import yaml
 
 from atom.api import Atom, Value, Typed, Dict, Event, Instance, Bool, Unicode, observe
 from enaml.qt import QtCore
@@ -88,6 +89,8 @@ class AppState(Atom):
             active_config = self.config.configurations[name]
 
             changelist = active_config.get_config().get_change_list()
+            print "ChangeList"
+            print changelist.to_dict()
             changelist.execute_do_change()
 
             deferred_call(setattr, self, "active_changelist", changelist)
