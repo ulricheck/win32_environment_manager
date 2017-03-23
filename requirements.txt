@@ -3,3 +3,4 @@ configparser>=3.5.0
 enaml>=0.9.8
 mock>=2.0.0
 QtPy>=1.2.1
+pyyaml>=3.12

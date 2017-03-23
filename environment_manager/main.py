@@ -83,7 +83,7 @@ def main():
         sys.exit(1)
 
     with enaml.imports():
-        from environment_manager.views.main_view import Main
+        from main_view import Main
 
     app = QtApplication()
 

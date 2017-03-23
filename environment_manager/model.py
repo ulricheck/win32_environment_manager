@@ -1,4 +1,5 @@
 import os, sys
+import yaml
 from atom.api import Atom, Value, List, Dict, Str, Bool, Int, Float, Enum, Typed, Coerced, Unicode
 if sys.platform.startswith('win'):
     from environment_manager import win32env as env
@@ -81,6 +82,9 @@ class Command(Atom):
     type = Enum('AddKey', 'RemoveKey', 'PrependValue', 'AppendValue', 'RemoveValue')
     name = Str()
     value = Unicode()
+
+    def to_dict(self):
+        pass
 
     def __repr__(self):
         if self.type == 'AddKey':
