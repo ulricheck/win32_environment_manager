@@ -14,6 +14,7 @@ import logging.config
 from environment_manager.app import AppState
 from environment_manager.guilogging import Syslog
 from environment_manager.model import parse_config
+from environment_manager.singletoninstance import SingleInstance, SingleInstanceException
 
 def main():
 
@@ -74,6 +75,13 @@ def main():
         log.error("Error parsing config file(s): %s" % (cfgfiles,))
         log.exception(e)
 
+    # check that only one instance is running
+    try:
+        singleton_process = SingleInstance("environment_manager")
+    except SingleInstanceException:
+        log.error("Another Process is already running.")
+        sys.exit(1)
+
     with enaml.imports():
         from environment_manager.views.main_view import Main
 
@@ -88,6 +96,8 @@ def main():
     # Start the application event loop
     app.start()
 
+    # free singleton
+    del singleton_process
 
 if __name__ == '__main__':
     main()

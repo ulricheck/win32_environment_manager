@@ -1,10 +1,25 @@
+import os
 from enaml.core.api import Conditional, Looper
 from enaml.layout.api import vbox, hbox, align, spacer
 from enaml.stdlib.message_box import question
 from enaml.widgets.api import MainWindow, MenuBar, Menu, Action, ActionGroup
+from enaml.icon import Icon, IconImage
+from enaml.image import Image
 from enaml.widgets.api import (
     Container, Label, Field, PushButton, ScrollArea, StatusBar, StatusItem, Html, MultilineField, PopupView, Form
 )
+
+def load_icon(name):
+	dirname = os.path.dirname(__file__)
+	fname = os.path.join(dirname, 'images', '%s.png' % name)
+	with open(fname, 'rb') as f:
+		data = f.read()
+	img = Image(data=data)
+	icg = IconImage(image=img)
+	return Icon(images=[icg])
+
+WINDOW_ICON = load_icon('emblem-system')
+
 
 enamldef ConfigurationOverview(PopupView):
     attr config
@@ -94,6 +109,7 @@ enamldef Main(MainWindow): win:
     attr appstate
 
     title = "Environment Manager"
+    icon = WINDOW_ICON
     minimum_size = (400,200)
 
     closing :: confirm_close(self, change['value'])
