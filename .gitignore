@@ -1,0 +1,6 @@
+dist/
+environment_manager.egg-info/
+*.pyc
+*.enamlc
+build/
+.idea/
