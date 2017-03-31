@@ -1,6 +1,6 @@
 import mock
 import time
-from os import system, environ, pathsep
+from os import pathsep
 
 MOCK_ENVIRONMENT = {
     "USER": {

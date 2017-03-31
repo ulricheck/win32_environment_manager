@@ -38,7 +38,6 @@ class BackgroundThread(QtCore.QThread):
             setattr(self.processor, k, v)
 
 
-
 class AppState(Atom):
     context = Dict()
     config = Typed(ConfigurationManager)
