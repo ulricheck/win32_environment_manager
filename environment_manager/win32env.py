@@ -69,7 +69,7 @@ def unique(paths):
 
 def prepend_value(name, values):
     paths = get_key(name).split(pathsep)
-    for value in values:
+    for value in reversed(values):
         remove(paths, '')
         paths = unique(paths)
         remove(paths, value)
