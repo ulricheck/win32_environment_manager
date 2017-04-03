@@ -1,5 +1,5 @@
 import os, sys
-from atom.api import Atom, Value, List, Dict, Str, Bool, Int, Float, Enum, Typed, Coerced, Unicode
+from atom.api import Atom, List, Dict, Str, Bool, Int, Enum, Unicode
 if sys.platform.startswith('win'):
     from environment_manager import win32env as env
 else:

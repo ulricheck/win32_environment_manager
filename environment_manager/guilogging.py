@@ -12,6 +12,7 @@ class ConsoleWindowLogHandler(logging.Handler):
         message = str(logRecord.getMessage())
         self.parent.logevent(message)
 
+
 class Syslog(Atom):
 
     logitems = List()
